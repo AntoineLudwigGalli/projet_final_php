@@ -18,6 +18,7 @@ if (isset ($_POST["email"]) &&
         $errors[] = "Le mot de passe doit comprendre au moins 8 caractères dont 1 lettre minuscule, 1 majuscule, un chiffre et un caractère spécial";
     }
 
+
     if($_POST["passwordValidation"] != $_POST["password"]){
         $errors[] = "La confirmation ne correspond pas au mot de passe.";
     }
@@ -33,12 +34,11 @@ if (isset ($_POST["email"]) &&
     // Si pas d'erreur, on se connecte à la BDD pour ajouter le compte user
     if(!isset($errors)){
         require "includes/bdd.php";
-//       Définition de la date au format FR
 
         $insertAccount = $db->prepare("INSERT INTO users (email, password, pseudonym, register_date) VALUES(?, ?, ?, ?)");
         $querySuccess = $insertAccount->execute([
             $_POST['email'],
-            $_POST['password'],
+            password_hash($_POST['password'], PASSWORD_BCRYPT),
             $_POST['pseudo'],
             date('Y-m-d H:i:s'),
             ]);
