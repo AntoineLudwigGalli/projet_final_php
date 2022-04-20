@@ -17,11 +17,11 @@ if(
     }
 
     if (isset($_POST["description"])) {
-        if (!preg_match("/^.{5,20000}$/u", $_POST["description"])) {
-            $errors[] = "La description doit compter entre 5 et 20000 caractères.";
-        } elseif(empty($_POST["description"])) {
+        if (empty($_POST["description"])) {
             $_POST["description"] = NULL;
         }
+        } elseif(!preg_match("/^.{5,20000}$/u", $_POST["description"])) {
+            $errors[] = "La description doit compter entre 5 et 20000 caractères.";
     }
 
     if (!empty($_FILES["picture"])) {
@@ -80,7 +80,7 @@ if(
                 $_POST["name"],
                 $_POST["country"],
                 $_POST["description"],
-                $_FILES["picture"]["name"],
+                $newFileName,
                 $_SESSION["account"]["user_id"]["id"],
         ]);
         $addFruit->closeCursor();
@@ -88,7 +88,6 @@ if(
 
     }
 }
-
 ?>
 <!doctype html>
 <html lang="fr">
