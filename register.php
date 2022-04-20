@@ -69,6 +69,7 @@ if (isset ($_POST["email"]) &&
     ?>
 </head>
 <body>
+<!--TODO : Ajouter les Required-->
     <div class="container-fluid">
         <div class="row mt-5">
              <h1 class="col-6 offset-3">Créer un compte sur Wikifruits</h1>

@@ -1,8 +1,6 @@
 <?php
 session_start();
-print_r($_SESSION["account"]);
 require "includes/bdd.php";
-print_r($_SESSION["account"]["pseudo"]);
 ?>
 <!doctype html>
 <html lang="fr">
