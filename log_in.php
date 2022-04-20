@@ -51,11 +51,20 @@ if (isset ($_POST["email"]) &&
             $date = $accountDate->fetch(PDO::FETCH_ASSOC);
             $accountDate->closeCursor();
 
+            $accountUserId = $db->prepare("SELECT id FROM users WHERE email = ?");
+            $accountUserId->execute([
+                $_POST['email'],
+            ]);
+
+            $user_id = $accountUserId->fetch(PDO::FETCH_ASSOC);
+            $accountUserId->closeCursor();
+
             $_SESSION["account"] = [
                 'email' => $_POST['email'],
                 'password' =>  $_POST['password'],
                 'pseudo' => $pseudo,
                 'registration_date' =>  $date,
+                'user_id' => $user_id,
             ];
 
             $successMsg = "Vous êtes connecté !";

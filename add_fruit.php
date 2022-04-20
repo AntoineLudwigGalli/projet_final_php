@@ -16,10 +16,10 @@ if(
         $errors[] = "Le pays d'origine doit être un de ceux listés";
     }
 
-    if (!empty($_POST["description"])) {
+    if (isset($_POST["description"])) {
         if (!preg_match("/^.{5,20000}$/u", $_POST["description"])) {
             $errors[] = "La description doit compter entre 5 et 20000 caractères.";
-        } else {
+        } elseif(empty($_POST["description"])) {
             $_POST["description"] = NULL;
         }
     }
@@ -74,7 +74,18 @@ if(
         }
     }
     if(!isset($errors)){
+        include_once "includes/bdd.php";
+        $addFruit = $db->prepare("INSERT INTO fruits(name, origin, description, picture_name, user_id) VALUES (?, ?, ?, ?, ?)");
+        $newFruit = $addFruit->execute([
+                $_POST["name"],
+                $_POST["country"],
+                $_POST["description"],
+                $_FILES["picture"]["name"],
+                $_SESSION["account"]["user_id"]["id"],
+        ]);
+        $addFruit->closeCursor();
         $successMsg = 'Votre fruit a bien été créé !';
+
     }
 }
 
@@ -98,7 +109,6 @@ if(
             <h1 class="col-6 offset-4">Ajouter un fruit</h1>
         </div>
         <?php
-        print_r($_POST);
         if(isset($errors)){
             foreach ($errors as $error){
                 echo "<p class='alert alert-danger'>" . $error . "</p>";
@@ -106,7 +116,7 @@ if(
         }
         if(isset($successMsg)){
             echo "<p class='alert alert-success'>" . $successMsg . "</p>";
-        }
+        } else {
         ?>
         <div class="row">
             <form class="col-6 offset-3 my-5" method="POST" action=""  enctype="multipart/form-data">
@@ -129,12 +139,14 @@ if(
                 </div>
                 <label class="form-label">Description</label>
                 <div class="input-group">
-                    <textarea class="form-control" placeholder="Description..." rows="10" name="description"></textarea>
+                    <textarea class="form-control" type="text" placeholder="Description..." rows="10" name="description"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary col-12">Créer le fruit</button>
                 <span class="text-danger">* Champs obligatoires</span>
             </form>
         </div>
+        <?php
+        }?>
     </div>
     <?php
     require_once "includes/js_includes.php";
