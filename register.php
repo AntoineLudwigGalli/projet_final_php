@@ -1,4 +1,5 @@
 <?php
+session_start();
 //On inclue la fonction du captcha
 require_once "includes/recaptchaValid.php";
 
@@ -37,9 +38,9 @@ if (isset ($_POST["email"]) &&
 
         $insertAccount = $db->prepare("INSERT INTO users (email, password, pseudonym, register_date) VALUES(?, ?, ?, ?)");
         $querySuccess = $insertAccount->execute([
-            $_POST['email'],
+            htmlspecialchars($_POST['email']),
             password_hash($_POST['password'], PASSWORD_BCRYPT),
-            $_POST['pseudo'],
+            htmlspecialchars($_POST['pseudo']),
             date('Y-m-d H:i:s'),
             ]);
         $insertAccount->closeCursor();

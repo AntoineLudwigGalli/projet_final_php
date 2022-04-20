@@ -1,4 +1,9 @@
 <?php
+session_start();
+if(isset($_SESSION['account'])){
+    header("Location: profile.php");
+}
+print_r($_SESSION);
 // Appel des variables
 if (isset ($_POST["email"]) &&
     isset ($_POST["password"])
@@ -17,7 +22,7 @@ if (isset ($_POST["email"]) &&
 
         $getAccount = $db->prepare("SELECT * FROM users WHERE email = ?");
         $getAccount->execute([
-            $_POST['email'],
+            htmlspecialchars($_POST['email']),
         ]);
 
         $account = $getAccount->fetch(PDO::FETCH_ASSOC);
@@ -30,7 +35,29 @@ if (isset ($_POST["email"]) &&
         } elseif (!password_verify($_POST["password"], $account["password"])) {
             $error[] = "Mot de passe incorrect !";
         } else {
-            $_SESSION["account"] = $account;
+            $accountPseudo = $db->prepare("SELECT pseudonym FROM users WHERE email = ?");
+            $accountPseudo->execute([
+                $_POST['email'],
+            ]);
+
+            $pseudo = $accountPseudo->fetch(PDO::FETCH_ASSOC);
+            $accountPseudo->closeCursor();
+
+            $accountDate = $db->prepare("SELECT register_date FROM users WHERE email = ?");
+            $accountDate->execute([
+                $_POST['email'],
+            ]);
+
+            $date = $accountDate->fetch(PDO::FETCH_ASSOC);
+            $accountDate->closeCursor();
+
+            $_SESSION["account"] = [
+                'email' => $_POST['email'],
+                'password' =>  $_POST['password'],
+                'pseudo' => $pseudo,
+                'registration_date' =>  $date,
+            ];
+
             $successMsg = "Vous êtes connecté !";
         }
         $getAccount->closeCursor();

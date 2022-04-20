@@ -12,14 +12,28 @@
                 <li class="nav-item">
                     <a class="nav-link" href="fruit_list.php">Liste des fruits</a>
                 </li>
+
+                <?php
+                if(!isset($_SESSION['account'])){
+                ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="register.php">
-                        Inscription
-                    </a>
+                    <a class="nav-link" href="register.php">Inscription</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="log_in.php">Connexion</a>
+                </li><?php
+                } else { ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="log_out.php">Déconnexion</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="profile.php">Mon profil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="add_fruit.php">Ajouter un fruit</a>
+                </li>
+                    <?php
+                }?>
             </ul>
             <form class="d-flex">
                 <input class="form-control me-2" type="search" placeholder="Chercher un fruit">
