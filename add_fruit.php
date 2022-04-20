@@ -7,57 +7,68 @@ $allowedMimeTypes = [
 ];
 if(
     (isset($_POST["name"])) &&
-    (isset($_POST["country"])
-)){
-    if(!preg_match("/^.{1,50}$/u",$_POST["name"])){
-        $errors[]= "Le nom doit contenir entre 1 et 50 caractères.";
+    (isset($_POST["country"])) &&
+    (isset($_FILES["picture"])) &&
+    (isset($_POST["description"])
+)) {
+    if (!preg_match("/^.{1,50}$/u", $_POST["name"])) {
+        $errors[] = "Le nom doit contenir entre 1 et 50 caractères.";
     }
-    if($_POST["country"] != "fr" && $_POST["country"] != "es" && $_POST["country"] != "de" && $_POST["country"] != "jp"){
+    if ($_POST["country"] != "fr" && $_POST["country"] != "es" && $_POST["country"] != "de" && $_POST["country"] != "jp") {
         $errors[] = "Le pays d'origine doit être un de ceux listés";
     }
-}
-if((!empty($_FILES["picture"]))
-    ){
-        $fileErrorCode = $_FILES['picture']['error'];
 
-        // 1er niveau de vérification du fichier : son code d'erreur et sa taille
-        if($fileErrorCode == 1 || $fileErrorCode == 2 || $_FILES['picture']['size'] > $maxPictureSize){
-            $errors[] = 'Le fichier est trop volumineux.';
-
-        } elseif($fileErrorCode == 3){
-            $errors[] = 'Le fichier n\'a pas été chargé correctement, veuillez ré-essayer.';
-
-        } elseif($fileErrorCode == 4){
-            $errors[] = 'Merci d\'envoyer un fichier !';
-
-        } elseif($fileErrorCode == 6 || $fileErrorCode == 7 || $fileErrorCode == 8){
-            $errors[] = 'Problème serveur, veuillez ré-essayer plus tard.';
-
-        } elseif($fileErrorCode == 0){
-
-            // 2eme niveau de vérification du fichier : son type MIME
-            // On a besoin de faire cette vérification dans un 2eme temps sinon on risque d'essayer de tester le type MIME d'un fichier qui n'existe pas, ce qui ferait une erreur PHP
-
-            // Récupération du vrai type MIME du fichier
-            $fileMIMEType = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['picture']['tmp_name']);
-
-            // Si le type MIME du fichier n'est pas dans l'array des types MIME autorisé, on crée une erreur
-            if(!in_array($fileMIMEType, $allowedMimeTypes)){
-                $errors[] = 'Seuls les fichiers jpg, png et gif sont autorisés !';
-            }
-
-        } else {
-
-            // Si on rentre ici, c'est qu'il y a un autre code d'erreur inconnu (peut-être PHP en ajoutera un jour ?)
-            // On fait donc une erreur pour mettre le formulaire en échec quand même
-            $errors[] = 'Problème inconnu';
-    }
-}
-
-if((!empty($_POST["description"]))
-    ){
-    if(!preg_match("/^.{5,20000}$/u",$_POST["description"])){
+    if (!preg_match("/^.{5,20000}$/u", $_POST["description"])) {
         $errors[] = "La description doit compter entre 5 et 20000 caractères.";
+    }
+
+    $fileErrorCode = $_FILES['picture']['error'];
+
+    // 1er niveau de vérification du fichier : son code d'erreur et sa taille
+    if ($fileErrorCode == 1 || $fileErrorCode == 2 || $_FILES['picture']['size'] > $maxPictureSize) {
+        $errors[] = 'Le fichier est trop volumineux.';
+
+    } elseif ($fileErrorCode == 3) {
+        $errors[] = 'Le fichier n\'a pas été chargé correctement, veuillez ré-essayer.';
+
+    } elseif ($fileErrorCode == 4) {
+        $errors[] = 'Merci d\'envoyer un fichier !';
+
+    } elseif ($fileErrorCode == 6 || $fileErrorCode == 7 || $fileErrorCode == 8) {
+        $errors[] = 'Problème serveur, veuillez ré-essayer plus tard.';
+
+    } elseif ($fileErrorCode == 0) {
+
+        // 2eme niveau de vérification du fichier : son type MIME
+        // On a besoin de faire cette vérification dans un 2eme temps sinon on risque d'essayer de tester le type MIME d'un fichier qui n'existe pas, ce qui ferait une erreur PHP
+
+        // Récupération du vrai type MIME du fichier
+        $fileMIMEType = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['picture']['tmp_name']);
+
+        // Si le type MIME du fichier n'est pas dans l'array des types MIME autorisé, on crée une erreur
+        if (!in_array($fileMIMEType, $allowedMimeTypes)) {
+            $errors[] = 'Seuls les fichiers jpg, png et gif sont autorisés !';
+        }
+
+    } else {
+
+        // Si on rentre ici, c'est qu'il y a un autre code d'erreur inconnu (peut-être PHP en ajoutera un jour ?)
+        // On fait donc une erreur pour mettre le formulaire en échec quand même
+        $errors[] = 'Problème inconnu';
+    }
+    if (!isset($errors)) {
+
+        $ext = array_search($fileMIMEType, $allowedMimeTypes);
+
+        // On génère un hash md5 d'une chaînes aléatoire d'une taille de 50 pour le nom du nom de fichier, et ce dans une boucle jusqu'à ce qu'on ait un nom de fichier pas déjà pris par un autre
+        do {
+            $newFileName = md5(random_bytes(50)) . '.' . $ext;
+        } while (file_exists('images/uploads/' . $newFileName));
+
+        // Sauvegarde du fichier avec son nouveau nom dans le dossier "images/"
+        move_uploaded_file($_FILES['picture']['tmp_name'], 'images/uploads/' . $newFileName);
+
+        $successMsg = 'Votre fruit a bien été créé !';
     }
 }
 
@@ -92,7 +103,7 @@ if((!empty($_POST["description"]))
         }
         ?>
         <div class="row">
-            <form class="col-6 offset-3 my-5" method="POST" action="" >
+            <form class="col-6 offset-3 my-5" method="POST" action=""  enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label">Nom *</label>
                     <input type="text" class="form-control" name="name" placeholder="Banane">
@@ -107,7 +118,8 @@ if((!empty($_POST["description"]))
                 </select>
                 <div class="mb-3">
                     <label for="formFile" class="form-label">Photo</label>
-                    <input class="form-control" type="file" id="formFile" name="picture">
+                    <input type="hidden" name="MAX_FILE_SIZE" value="<?= $maxPictureSize ?>">
+                    <input class="form-control" type="file" accept="<?= implode(', ', $allowedMimeTypes) ?>" name="picture">
                 </div>
                 <label class="form-label">Description</label>
                 <div class="input-group">
